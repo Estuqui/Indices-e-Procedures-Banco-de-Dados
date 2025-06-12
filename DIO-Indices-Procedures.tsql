@@ -1,0 +1,91 @@
+-- Parte 1 – Índices e Consultas
+
+CREATE TABLE department (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    city VARCHAR(100)
+);
+
+CREATE TABLE employee (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES department(id)
+);
+
+-- 1. Qual o departamento com maior número de pessoas?
+
+SELECT d.name, COUNT(e.id) AS total_employees
+FROM department d
+JOIN employee e ON d.id = e.department_id
+GROUP BY d.name
+ORDER BY total_employees DESC
+LIMIT 1;
+
+-- 2. Quais são os departamentos por cidade?
+
+SELECT city, GROUP_CONCAT(name) AS departments
+FROM department
+GROUP BY city;
+
+-- 3. Relação de empregados por departamento
+
+SELECT d.name AS department, e.name AS employee
+FROM employee e
+JOIN department d ON e.department_id = d.id
+ORDER BY d.name;
+
+-- Índice para melhorar a performance da contagem de funcionários por departamento
+
+CREATE INDEX idx_employee_department ON employee(department_id);
+
+-- Índice para melhorar a busca por cidade em departamentos
+CREATE INDEX idx_department_city ON department(city);
+
+------------------------------------------------------------------------------------------------
+
+USE ecommerce;
+
+DELIMITER //
+
+CREATE PROCEDURE manage_product(
+    IN action INT,
+    IN prod_id INT,
+    IN prod_name VARCHAR(100),
+    IN prod_price DECIMAL(10,2)
+)
+BEGIN
+    IF action = 1 THEN
+        INSERT INTO product(id, name, price) VALUES (prod_id, prod_name, prod_price);
+    ELSEIF action = 2 THEN
+        UPDATE product SET name = prod_name, price = prod_price WHERE id = prod_id;
+    ELSEIF action = 3 THEN
+        DELETE FROM product WHERE id = prod_id;
+    END IF;
+END //
+
+DELIMITER ;
+
+--------------------------------------------------------------------------------------------
+
+USE universidade;
+
+DELIMITER //
+
+CREATE PROCEDURE manage_student(
+    IN action INT,
+    IN stud_id INT,
+    IN stud_name VARCHAR(100),
+    IN stud_course VARCHAR(100)
+)
+BEGIN
+    IF action = 1 THEN
+        INSERT INTO student(id, name, course) VALUES (stud_id, stud_name, stud_course);
+    ELSEIF action = 2 THEN
+        UPDATE student SET name = stud_name, course = stud_course WHERE id = stud_id;
+    ELSEIF action = 3 THEN
+        DELETE FROM student WHERE id = stud_id;
+    END IF;
+END //
+
+DELIMITER ;
